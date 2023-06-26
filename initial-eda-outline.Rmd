@@ -1,41 +1,109 @@
 ---
 title: "Initial EDA Basic Outline"
-author: "Names of all group members"
+author: "Mysha Nihal"
 output: html_notebook
 ---
 
-This is an outline for your Initial EDA. You can follow this outline, or you can modify it as you see fit. Do what works best for your project. 
+This is an outline for your Initial EDA.
 
 ## Research Question 
 
-State your specific research question and why it is interesting. 
+Is poor air quality in different states correlated with poor respiratory health?
 
-
+This is interesting because it helps the viewers understand how bad air affects health issues in diferrent states depending on their air quality.
 
 ## Data Processing 
 
+```{r}
+
+library(readr)
+
+```
+
+
 #### Data Intake 
 
-Include R code and written explanation to import your **TWO** data sets.
+```{r}
+
+State_Output_Emission_Rates_2021 <- read_csv("State Output Emission Rates 2021.csv")
+
+Underlying_Causes_of_Death_2021 <- read_csv("Underlying Causes of Death 2021.csv")
+
+```
+
+
 
 #### Data Wrangling 
+```{r}
 
-Include R code and written explanation for wangling your data (you can make multiple wrangled data sets). 
+# Merge the datasets based on state
 
+merged <- merge(State_Output_Emission_Rates_2021, Underlying_Causes_of_Death_2021, by= "State")
 
+# Select variables for analysis
 
+data <- merged[, c("State", "Annual NOX", "Ozone Season NOX", "Cause of death", "Population", "Total Deaths")]
+
+```
 
 ## Data Visualization
 
 #### Plot 1
 
-Include R code to make one data visualization (I would encourage you to use 3 or more variables). Include a brief written description of what your graph shows. Is this graph helpful in answering your research question? If it is helpful, will you need to add/modify anything in this graph in the final report? 
+```{r}
+
+#Description: This plot shows how in year 2021 the Annual Nitrogen oxides emissions in the United States rose linearly with Ozone Season Nitrogen oxides emissions. It helps to understand the how air pollution rises by ozone layer. I do not think I will modify anything in this graph in the final report.
+
+library(ggplot2)
+
+ggplot(data) +
+  aes(
+    x = `Ozone Season NOX`,
+    y = `Annual NOX`,
+    colour = State
+  ) +
+  geom_point(shape = "square filled", size = 1.5) +
+  scale_color_hue(direction = 1) +
+  labs(
+    title = "Annual NOX rises linearly with Ozone Season NOX"
+  ) +
+  theme_minimal()
+
+```
+
 
 #### Plot 2
 
-Include R code to make one data visualization (I would encourage you to use 3 or more variables). Include a brief written description of what your graph shows. Is this graph helpful in answering your research question? If it is helpful, will you need to add/modify anything in this graph in the final report? 
+```{r}
+
+#Description: This bar chart shows the top 10 states in the United States that had the most deaths from respiratory diseases caused by air pollution in 2021. It helps us understand how air pollution affects the number of people who die from respiratory problems. The states are ranked from highest to lowest based on the total number of deaths. The chart highlights the connection between high levels of air pollution and increased respiratory-related deaths. I won't be changing anything in this graph for my final report.
+
+library(dplyr)
+library(ggplot2)
+
+top_states <- data %>%
+  top_n(10, `Total Deaths`)
+
+# Convert State to an ordered factor based on Total Deaths
+top_states$State <- factor(top_states$State, levels = top_states$State[order(top_states$`Total Deaths`, decreasing = TRUE)])
+
+# Create the plot
+ggplot(top_states, aes(x = State, y = `Annual NOX`, fill = State)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  labs(x = "State", y = "Annual NOX", fill = "State") +
+  geom_text(aes(label = `Total Deaths`), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  scale_fill_discrete(guide = FALSE) +
+  ggtitle("Top 10 States with Highest Deaths and their Annual NOX")
+
+```
 
 
 ## Conclusion
+```{r}
 
-Include your initial intuition as to what the answer to your research question is using the data sets and visualizations you created. 
+#Based on the initial EDA, it can be inferred that there is a relationship between poor air quality and poor respiratory health. The visualizations help viewers understand how air pollution impacts health across different states, depending on their air quality level.
+
+```
+
