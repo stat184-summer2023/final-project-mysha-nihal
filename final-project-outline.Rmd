@@ -1,37 +1,145 @@
 ---
 title: "Final Project Basic Outline"
-author: "Names of all group members"
+author: "Mysha Nihal"
 output: html_notebook
 ---
 
-This is an outline for your final project. You can follow this outline, or you can modify it as you see fit. Do what works best for your project. 
+## Research Question
 
-## Research Question 
+```{r}
 
-State your general specific question and why it is interesting. 
+# "Is poor air quality in different states correlated with poor respiratory health?"
 
+```
 
+## Purpose
+
+```{r}
+
+# Air quality is a critical environmental factor that can significantly impact human health, specially respiratory health. With increasing concerns about air pollution and its potential effects on public well-being.
+
+# This research project aims to explore the correlation between poor air quality and respiratory health across different states in the United States. By analyzing the air quality data from 2021 for each state and examining the number of deaths caused by respiratory diseases in the same year, we can gain valuable insights into how air pollution affects respiratory health at the state level.
+
+#Air quality data set: https://www.epa.gov/outdoor-air-quality-dataLinks
+
+#Respiratory health data set: https://www.cdc.gov/nchs/nhanes/index.htmLinks
+
+```
 
 ## Data Processing 
 
+```{r}
+
+library(readr)
+
+```
+
 #### Data Intake 
 
-Include R code and written explanation to import your **TWO** data sets.
+```{r}
+
+State_Output_Emission_Rates_2021 <- read_csv("State Output Emission Rates 2021.csv")
+
+head(State_Output_Emission_Rates_2021) #Glimpse of data
+
+Underlying_Causes_of_Death_2021 <- read_csv("Underlying Causes of Death 2021.csv")
+
+head(Underlying_Causes_of_Death_2021) #Glimpse of data
+
+```
 
 #### Data Wrangling 
 
-Include R code and written explanation for wangling your data (you can make multiple wrangled data sets). 
+```{r}
 
+# Join the data sets based on state
 
+joined_data <- inner_join(State_Output_Emission_Rates_2021, Underlying_Causes_of_Death_2021, by = "State")
 
+# Select variables for analysis
+
+data <- joined_data[, c("State", "Annual NOX", "Ozone Season NOX", "Cause of death", "Population", "Total Deaths")]
+
+```
 
 ## Data Visualization
 
-Include R code and written explanation for your data visualization(s) with at least 3 variables. You must have **at least** one graph. You may have more than one (I would encourage you to have more than one). 
+#### Plot 1
 
+```{r}
 
+#Description: This plot shows the linear relationship between annual nitrogen oxides (NOx) emissions and ozone season nitrogen oxides (NOx) emissions in the United States for the year 2021. It helps us understand how air pollution increases during the ozone season. The plot uses a scatter plot with black square dots and and I have added a linear transparent yellow linear line for better visualization. 
 
+library(ggplot2)
+
+# Plotting the linear relationship between Annual and Ozone Season NOx
+plot1 <- ggplot(data, aes(x = `Annual NOX`, 
+                          y = `Ozone Season NOX`, 
+                          colour = State)) +
+  
+  geom_point(shape = "square filled", size = 2) +  # Scatter plot
+  
+  # Transparent linear regression line
+  geom_smooth(method = "lm", se = FALSE, color = "yellow", alpha = 0.1) +  
+  
+  labs(x = "Annual Nitrogen Oxides (NOx) emissions",
+       y = "Ozone Season Nitrogen Oxides (NOx) emissions",
+       title = "Relationship between Annual and Ozone Season NOx Emissions in 2021") +
+  
+  theme_minimal() +
+  theme(legend.position = "right",
+        legend.text = element_text(size = 6),  # Increase legend text size
+        plot.title = element_text(size = 9),
+        axis.text = element_text(size = 9),  # Smaller font size
+        axis.title = element_text(size = 9),
+        legend.key.size = unit(0.5, "cm"),)
+
+print(plot1)
+
+```
+
+#### Plot 2
+
+```{r}
+
+#This bar chart displays the top 10 states in the United States with the highest number of deaths from respiratory diseases caused by air pollution in 2021. The states are ranked from highest to lowest based on the total number of deaths.The bars are filled with orange color, and the total number of deaths is displayed above each bar.
+
+#This chart highlights the connection between high levels of air pollution and increased respiratory-related deaths. 
+
+library(ggplot2)
+
+# Sort the data by total deaths in descending order and select the top 10 states
+top_states <- head(data[order(-data$`Total Deaths`), ], 10)
+
+plot2 <- ggplot(top_states, aes(x = reorder(State, -`Total Deaths`), 
+                                y = `Total Deaths`)) +
+  
+  geom_bar(stat = "identity", fill = "orange") +  # Bar chart
+  
+  # Add labels for total deaths on top of each bar
+  geom_text(aes(label = `Total Deaths`), vjust = -0.5, size = 3) +  
+  
+  labs(x = "State",
+       y = "Number of Deaths",
+       title = "Top 10 States with the Most Deaths from Respiratory Diseases Caused by Air Pollution in 2021") +
+  
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank(),   # Keep vertical grid lines
+        panel.grid.minor.x = element_blank(),   # Keep vertical grid lines
+        panel.grid.major.y = element_line(),    # Remove horizontal grid lines
+        panel.grid.minor.y = element_line(),    # Remove horizontal grid lines
+        plot.title = element_text(size = 10))  
+
+print(plot2)
+
+```
 
 ## Conclusion
 
-Answer your research question using the data sets and visualizations you created. 
+```{r}
+
+#The initial analysis indicates a clear correlation between poor air quality and respiratory health issues. The visualizations presented in this study provide compelling evidence of the impact of air pollution on respiratory health across different states.
+
+#By conducting additional research and developing strategies, we can work towards creating healthier environment and ensuring a better future for all.
+
+```
